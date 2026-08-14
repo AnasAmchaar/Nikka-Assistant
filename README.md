@@ -1,6 +1,10 @@
-# Nikka 
+<div align="center">
+  <img src="assets/banner.jpg" alt="Nikka — AI Windows Desktop Agent" width="100%" />
+</div>
 
-> **AI Desktop Agent for Windows OS Automation via Local LLMs**
+# Nikka 🤖
+
+> **AI Desktop Agent for Windows OS Automation via Local LLMs**  
 > Created for & by **Anas Amchaar**
 
 Nikka is a production-grade, low-context AI desktop assistant designed to run on Windows PCs powered by local LLMs (e.g., Gemma 3 12B / 4B via LM Studio) without requiring heavy vision models.
