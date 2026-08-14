@@ -1,4 +1,4 @@
-# Nikka 🤖
+# Nikka 
 
 > **AI Desktop Agent for Windows OS Automation via Local LLMs**
 > Created for & by **Anas Amchaar**
@@ -7,7 +7,7 @@ Nikka is a production-grade, low-context AI desktop assistant designed to run on
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 - **Anti-Hallucination UI Abstraction**: Traverses the Windows UI Automation (UIA) tree via `pywinauto`, filters to interactive controls, and maps sequential integer IDs (e.g. `[ID: 1] Button: 'Save'`) to coordinates in internal memory. The LLM only reasons over IDs — never pixel coordinates.
 - **Universal Multi-Modal Capabilities**:
@@ -22,7 +22,7 @@ Nikka is a production-grade, low-context AI desktop assistant designed to run on
 
 ---
 
-## 📦 Project Structure
+## Project Structure
 
 ```
 Nikka/
@@ -55,7 +55,7 @@ Nikka/
 
 ---
 
-## 🛠️ Installation & Setup
+## Installation & Setup
 
 1. **Clone and activate your virtual environment:**
    ```powershell
@@ -82,7 +82,7 @@ Nikka/
 
 ---
 
-## 🧩 Extending Nikka with New Tools
+## Extending Nikka with New Tools
 
 To add a new capability (e.g. file operations, clipboard, audio control):
 
@@ -102,7 +102,7 @@ To add a new capability (e.g. file operations, clipboard, audio control):
 
 ---
 
-## 🧪 Running Tests
+## Running Tests
 
 ```powershell
 pytest tests/ -v
