@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nikka"
+version = "0.1.0"
+description = "Nikka — AI Desktop Agent for Windows automation via local LLM"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Anas Amchaar"}]
+
+dependencies = [
+    "smolagents[openai]>=1.14.0",
+    "openai>=1.30.0",
+    "litellm>=1.40.0",
+    "pywinauto>=0.6.8",
+    "pyautogui>=0.9.54",
+    "pyvda>=0.4.2",
+    "psutil>=5.9.8",
+    "keyboard>=0.13.5",
+    "colorama>=0.4.6",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
+
+[project.scripts]
+nikka = "nikka.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["nikka*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
