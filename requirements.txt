@@ -1,0 +1,21 @@
+# Nikka — AI Windows Desktop Agent
+# Core LLM & Agent Framework
+smolagents[openai]>=1.14.0
+openai>=1.30.0
+litellm>=1.40.0
+
+# OS Automation — UI Tree Parsing & Interaction
+pywinauto>=0.6.8
+pyautogui>=0.9.54
+
+# OS Automation — Virtual Desktops
+pyvda>=0.4.2
+
+# Process Management
+psutil>=5.9.8
+
+# Input Simulation (supplementary)
+keyboard>=0.13.5
+
+# Utilities
+colorama>=0.4.6
