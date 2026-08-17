@@ -107,6 +107,20 @@ def test_tool_discovery():
         "spotify_add_to_queue",
         "spotify_play_songs_in_order",
         "spotify_toggle_shuffle",
+        "spotify_get_current_track",
+        "spotify_pause",
+        "spotify_resume",
+        "spotify_skip_next",
+        "spotify_skip_previous",
+        "spotify_set_volume",
+        "spotify_set_repeat",
+        "spotify_seek",
+        "spotify_search_by_mood",
+        "spotify_create_playlist",
+        "spotify_manage_playlist",
+        "spotify_get_devices",
+        "spotify_transfer_playback",
+        "spotify_like_track",
         # Apps
         "launch_application",
         "list_running_apps",
@@ -132,6 +146,38 @@ def test_settings_defaults():
     assert test_settings.max_agent_steps >= 5
     assert "edge" in test_settings.app_aliases
     assert "notepad" in test_settings.app_aliases
+
+
+def test_settings_spotify_defaults():
+    """Verify that Spotify settings have correct defaults."""
+    test_settings = NikkaSettings()
+    assert test_settings.spotify_client_id == ""
+    assert test_settings.spotify_client_secret == ""
+    assert "127.0.0.1:8888" in test_settings.spotify_redirect_uri
+    assert test_settings.spotify_default_device == ""
+
+
+def test_mood_profiles():
+    """Verify that all mood profiles have valid audio feature ranges."""
+    from nikka.tools._spotify_client import MOOD_PROFILES, SUPPORTED_MOODS
+
+    # All moods should be in the sorted list
+    assert set(SUPPORTED_MOODS) == set(MOOD_PROFILES.keys())
+
+    for mood, profile in MOOD_PROFILES.items():
+        # Every profile must have seed_genres
+        assert "seed_genres" in profile, f"Mood '{mood}' missing seed_genres"
+        assert len(profile["seed_genres"]) > 0, f"Mood '{mood}' has empty seed_genres"
+        assert len(profile["seed_genres"]) <= 5, f"Mood '{mood}' has >5 seed_genres (API limit)"
+
+        # Validate min/max ranges are consistent
+        for feature in ("valence", "energy", "danceability", "acousticness", "instrumentalness", "tempo"):
+            min_key = f"min_{feature}"
+            max_key = f"max_{feature}"
+            if min_key in profile and max_key in profile:
+                assert profile[min_key] <= profile[max_key], (
+                    f"Mood '{mood}': {min_key}={profile[min_key]} > {max_key}={profile[max_key]}"
+                )
 
 
 def test_security_scanner():
@@ -185,5 +231,3 @@ def test_security_scanner():
     b64_result = analyze_security(b64_payload)
     b64_report = _json.loads(b64_result)
     assert b64_report["scan_summary"]["total_findings"] >= 1
-
-

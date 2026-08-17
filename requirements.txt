@@ -17,5 +17,8 @@ psutil>=5.9.8
 # Input Simulation (supplementary)
 keyboard>=0.13.5
 
+# Spotify Web API
+spotipy>=2.24.0
+
 # Utilities
 colorama>=0.4.6

@@ -98,6 +98,24 @@ class NikkaSettings(BaseSettings):
         description="Friendly app names → shell commands.",
     )
 
+    # ── Spotify Web API ────────────────────────────────────────────────────
+    spotify_client_id: str = Field(
+        default="",
+        description="Spotify OAuth Client ID from developer.spotify.com/dashboard.",
+    )
+    spotify_client_secret: str = Field(
+        default="",
+        description="Spotify OAuth Client Secret.",
+    )
+    spotify_redirect_uri: str = Field(
+        default="http://127.0.0.1:8888/callback",
+        description="OAuth redirect URI (must match the one set in Spotify Developer Dashboard).",
+    )
+    spotify_default_device: str = Field(
+        default="",
+        description="Preferred Spotify playback device name (empty = use active device).",
+    )
+
     # ── System Prompt ──────────────────────────────────────────────────────
     system_prompt: str = Field(
         default="""\
@@ -133,11 +151,22 @@ You can operate any Windows application (Native apps, Electron/Spotify/Discord, 
    - If you only need to run a single quick action, you may skip this workflow.
 
 6. **Spotify Playback Control** (USE THESE for Spotify tasks):
-   - Single song: `spotify_search_and_play("song name artist")` — searches and plays immediately.
-   - Queue a song: `spotify_add_to_queue("song name")` — adds to queue without interrupting current playback.
-   - **Play a list in order**: `spotify_play_songs_in_order(["song1", "song2", "song3"])` — plays the first, queues the rest.
-   - Toggle shuffle: `spotify_toggle_shuffle(False)` — disable for ordered playback.
-   - Basic controls: `media_control("play_pause")`, `media_control("next")`, `media_control("prev")`.
+   - **Search & Play**: `spotify_search_and_play("song name artist")` — searches and plays immediately.
+   - **Queue**: `spotify_add_to_queue("song name")` — adds to queue without interrupting playback.
+   - **Ordered Playlist**: `spotify_play_songs_in_order(["song1", "song2", "song3"])` — plays all in order.
+   - **Shuffle**: `spotify_toggle_shuffle(False)` — disable for ordered playback.
+   - **Current Track**: `spotify_get_current_track()` — get track info, progress, duration (detects end of song).
+   - **Pause/Resume**: `spotify_pause()`, `spotify_resume()` — control playback.
+   - **Skip**: `spotify_skip_next()`, `spotify_skip_previous()` — next/previous track.
+   - **Volume**: `spotify_set_volume(75)` — set volume 0-100.
+   - **Repeat**: `spotify_set_repeat("track")` — 'off', 'track', or 'context'.
+   - **Seek**: `spotify_seek(30)` — seek to position in seconds.
+   - **Mood Search**: `spotify_search_by_mood("chill")` — find & play tracks by mood (happy/sad/energetic/calm/romantic/party/focus/angry/chill/workout).
+   - **Create Playlist**: `spotify_create_playlist("My Vibes", songs=["song1", "song2"])` — create and populate a playlist.
+   - **Manage Playlists**: `spotify_manage_playlist("list")`, `spotify_manage_playlist("tracks", "playlist name")`, `spotify_manage_playlist("add", "playlist name", ["song1"])`, `spotify_manage_playlist("remove", "playlist name", ["song1"])`.
+   - **Devices**: `spotify_get_devices()`, `spotify_transfer_playback("phone")` — list and switch devices.
+   - **Like**: `spotify_like_track()` (current) or `spotify_like_track("song name")`.
+   - Basic media controls: `media_control("play_pause")`, `media_control("next")`, `media_control("prev")`.
    - ALWAYS prefer these dedicated Spotify tools over manual step-by-step UI interaction.
 
 ## Best Practices
