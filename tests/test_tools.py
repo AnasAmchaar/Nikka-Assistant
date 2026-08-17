@@ -4,6 +4,8 @@ Unit tests for Nikka core state manager, settings, and tool discovery.
 
 from __future__ import annotations
 
+import textwrap
+
 import pytest
 
 from nikka.core.ui_state import UIElement, UIStateManager
@@ -90,6 +92,9 @@ def test_tool_discovery():
         # Desktop
         "switch_virtual_desktop",
         "move_window_to_desktop",
+        "ensure_nikka_desktop",
+        "return_to_user_desktop",
+        "get_desktop_info",
         # Mouse
         "mouse_click",
         "mouse_double_click",
@@ -97,9 +102,16 @@ def test_tool_discovery():
         "mouse_drag",
         "mouse_scroll",
         "get_mouse_position_and_resolution",
+        # Spotify
+        "spotify_search_and_play",
+        "spotify_add_to_queue",
+        "spotify_play_songs_in_order",
+        "spotify_toggle_shuffle",
         # Apps
         "launch_application",
         "list_running_apps",
+        # Security
+        "analyze_security",
     }
 
     for expected in expected_tools:
@@ -120,3 +132,58 @@ def test_settings_defaults():
     assert test_settings.max_agent_steps >= 5
     assert "edge" in test_settings.app_aliases
     assert "notepad" in test_settings.app_aliases
+
+
+def test_security_scanner():
+    """Verify that the security scanner detects known vulnerability patterns."""
+    import json as _json
+
+    from nikka.tools.security import SecurityAnalyzerTool, analyze_security
+
+    # 1. Source code analysis
+    vulnerable_code = textwrap.dedent("""\
+        import os
+        import pickle
+
+        password = "SuperSecret123"
+        user_input = input("cmd> ")
+        os.system(user_input)
+        data = pickle.loads(open("data.pkl", "rb").read())
+        result = eval(user_input)
+    """)
+
+    tool_instance = SecurityAnalyzerTool()
+    result = tool_instance(vulnerable_code)
+    report = _json.loads(result)
+
+    assert report["scan_summary"]["total_findings"] >= 3, (
+        f"Expected at least 3 findings, got {report['scan_summary']['total_findings']}"
+    )
+
+    categories = {f["category"] for f in report["findings"]}
+    assert "Command Injection" in categories, "Should detect os.system / eval"
+    assert "Unsafe Deserialization" in categories, "Should detect pickle.loads"
+    assert "Hardcoded Credentials" in categories, "Should detect password assignment"
+
+    # Verify line numbers are captured
+    for finding in report["findings"]:
+        if finding["category"] == "Command Injection" and finding["line"] is not None:
+            assert finding["line"] in (6, 8)
+            assert finding["severity"] == "CRITICAL"
+            assert "recommendation" in finding
+
+    # 2. Raw binary shellcode payload (hex formatted)
+    hex_payload = "90 90 90 90 cd 80"
+    hex_result = analyze_security(hex_payload)
+    hex_report = _json.loads(hex_result)
+    assert hex_report["scan_summary"]["total_findings"] >= 1
+    assert any("shellcode" in f["description"].lower() or "nop" in f["description"].lower() or "syscall" in f["description"].lower() for f in hex_report["findings"])
+
+    # 3. Base64 payload containing /bin/sh
+    import base64
+    b64_payload = base64.b64encode(b"some prefix text /bin/sh some suffix").decode("ascii")
+    b64_result = analyze_security(b64_payload)
+    b64_report = _json.loads(b64_result)
+    assert b64_report["scan_summary"]["total_findings"] >= 1
+
+

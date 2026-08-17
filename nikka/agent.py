@@ -7,6 +7,7 @@ Configures and builds the smolagents CodeAgent wired to the local LLM endpoint.
 from __future__ import annotations
 
 import logging
+import re
 from typing import Sequence
 
 from smolagents import CodeAgent, LiteLLMModel
@@ -16,6 +17,48 @@ from nikka.settings import settings
 from nikka.tools._registry import discover_tools
 
 logger = logging.getLogger("nikka.agent")
+
+
+# ── Patch smolagents code parser for local LLM compatibility ──────────────────
+# Local models (Gemma, Llama, Mistral, etc.) sometimes output code blocks with
+# non-standard language tags like ```tool_code, ```code, ```Tool, etc.
+# The stock smolagents parser only accepts ```python/```py and <code> tags.
+# This patch normalizes those before parsing so Nikka works reliably with any LLM.
+
+_CODE_BLOCK_ALIASES = re.compile(
+    r"```(?:tool_code|code|tool|py|python|Tool_code|PYTHON)\b",
+    re.IGNORECASE,
+)
+
+
+def _patch_code_parser() -> None:
+    """Monkey-patch smolagents.utils.parse_code_blobs for broader format support."""
+    import smolagents.utils as _utils
+
+    _original_parse = _utils.parse_code_blobs
+
+    def _patched_parse(text: str, code_block_tags: tuple[str, str]) -> str:
+        # Normalize any non-standard code block tags to ```python
+        normalized = _CODE_BLOCK_ALIASES.sub("```python", text)
+        return _original_parse(normalized, code_block_tags)
+
+    _utils.parse_code_blobs = _patched_parse
+
+    # Also patch at the module level where agents.py imported it
+    try:
+        import smolagents.agents as _agents
+
+        _agents.parse_code_blobs = _patched_parse
+    except (ImportError, AttributeError):
+        pass
+
+    logger.debug("Patched smolagents code parser for local LLM compatibility")
+
+
+_patch_code_parser()
+
+
+# ── Agent factory ─────────────────────────────────────────────────────────────
 
 
 def build_agent(
@@ -60,6 +103,8 @@ def build_agent(
         model=model,
         max_steps=target_max_steps,
         add_base_tools=False,
+        code_block_tags="markdown",
     )
 
     return agent
+

@@ -38,7 +38,7 @@ class NikkaSettings(BaseSettings):
 
     # ── Agent Tuning ───────────────────────────────────────────────────────
     max_agent_steps: int = Field(
-        default=12,
+        default=20,
         ge=1,
         description="Hard ceiling on ReAct iterations per user request.",
     )
@@ -123,13 +123,29 @@ You can operate any Windows application (Native apps, Electron/Spotify/Discord, 
 
 4. **Multi-Tasking & Desktops**:
    - `switch_virtual_desktop(desktop_number)` (1-indexed)
-   - `move_window_to_desktop(app_name, desktop_number)`
+   - `move_window_to_desktop(app_name, desktop_number)` — use desktop_number=0 to target Nikka's desktop.
+
+5. **Working on Your Own Desktop** (IMPORTANT):
+   - Before multi-step GUI work (opening apps, clicking, typing), call `ensure_nikka_desktop()` to switch to your own dedicated desktop so the user is not disturbed.
+   - Do ALL your GUI work on Nikka's desktop.
+   - When done, call `return_to_user_desktop()` to return to the user's desktop.
+   - Use `get_desktop_info()` to check which desktop you're on if unsure.
+   - If you only need to run a single quick action, you may skip this workflow.
+
+6. **Spotify Playback Control** (USE THESE for Spotify tasks):
+   - Single song: `spotify_search_and_play("song name artist")` — searches and plays immediately.
+   - Queue a song: `spotify_add_to_queue("song name")` — adds to queue without interrupting current playback.
+   - **Play a list in order**: `spotify_play_songs_in_order(["song1", "song2", "song3"])` — plays the first, queues the rest.
+   - Toggle shuffle: `spotify_toggle_shuffle(False)` — disable for ordered playback.
+   - Basic controls: `media_control("play_pause")`, `media_control("next")`, `media_control("prev")`.
+   - ALWAYS prefer these dedicated Spotify tools over manual step-by-step UI interaction.
 
 ## Best Practices
 - Prefer `paste_text(text)` over `type_text` for paths, complex strings, or non-ASCII characters.
 - If an element has an ID from `get_screen_context()`, use `click_element(element_id)`.
 - If an element is not exposed in the UI tree, use hotkeys (`press_hotkey`) or direct mouse coordinates (`mouse_click`).
 - Keep reasoning steps brief and concise.
+- For complex multi-item tasks (playlists, batch operations), prefer compound tools that handle loops internally.
 """,
         description="System prompt injected into the LLM context.",
     )
